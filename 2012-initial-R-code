@@ -1,0 +1,98 @@
+
+# # # 2012 START
+
+# # 2012 SET UP
+
+# read/import data
+QLFS_2012_Q3_df <- read_sav("~/QLFS data only/2012/QLFS-2012-Q3-worker.sav")
+
+# new df filtered for CPT & WAP only
+QLFS_2012_Q3_CPT_WAP_df <- filter(QLFS_2012_Q3_df, Metro_code ==71, age_grp1>3 & age_grp1<14) # create a new df by filtering for cape town only
+
+
+# some initial double checking
+WAP_temp_df_2012 <- crosstab(QLFS_2012_Q3_CPT_WAP_df, x=age_grp1, y=Q15POPULATION, weight=Weight)
+write_csv(WAP_temp_df_2012, '~/RStudio outputs/2012_WAP_cpt.csv')
+remove(WAP_temp_df_2012)
+
+employ_temp_df_2012 <- crosstab(QLFS_2012_Q3_CPT_WAP_df, x=age_grp1, y=Status, weight=Weight)
+write_csv(employ_temp_df_2012, '~/RStudio outputs/2012_employ_cpt.csv')
+remove(employ_temp_df_2012)
+
+occup_temp_df_2012 <- crosstab(QLFS_2012_Q3_CPT_WAP_df, x=age_grp1, y=Occup, weight=Weight)
+write_csv(occup_temp_df_2012, '~/RStudio outputs/2012_occup_cpt.csv')
+remove(occup_temp_df_2012)
+
+
+
+## 2012 EDUCATION & EMPLOYMENT CALCULATIONS
+
+# recode education variable to grouped levels of education, consistent with previous work; 
+# this is supposed to include [labels] but it's not working for some reason, so this is a temporary solution
+
+
+QLFS_2012_Q3_CPT_WAP_df$educ_recode <- 
+  rec(QLFS_2012_Q3_CPT_WAP_df$Q17EDUCATION, 
+      rec = "0:6=1; 7:11,13:14,19:20=2; 12,15=3; 16:18,21:23=4; 24:28=5; 29:30=99; 98=0") 
+
+educ_labels <- c(
+  "Incomplete primary school" = 1,
+  "Incomplete secondary school" = 2,
+  "Completed secondary school" = 3,
+  "Post secondary qualifications" = 4,
+  "University degree (or equivalent)" = 5,
+  "No formal schooling" = 0,
+  "Other" = 99)
+
+QLFS_2012_Q3_CPT_WAP_df <- QLFS_2012_Q3_CPT_WAP_df %>%
+  mutate(educ_recode = add_value_labels(educ_recode, labels = educ_labels))
+
+
+
+# create and write temp df to check educ_recode variable; then remove df
+educ_recode_check_temp2012 <- crosstab(QLFS_2012_Q3_CPT_WAP_df, y = educ_recode, x = Q17EDUCATION, weight = Weight)
+
+write_csv(educ_recode_check_temp2012, '~/RStudio outputs/2012_educ_recode_check_cpt.csv',append = FALSE, col_names = TRUE) 
+
+
+
+# create and write temp df of crosstab between educ_recode and race variables; then remove df
+educ_race_2012_Q3 <- crosstab(QLFS_2012_Q3_CPT_WAP_df, x = educ_recode, y = Q15POPULATION, weight = Weight)
+write_csv(educ_race_2012_Q3, '~/RStudio outputs/2012_Q3_educ_race_cpt.csv', append = FALSE, col_names = TRUE)
+
+
+
+# create and write temp df of crosstab between educ_recode and employment status variables; then remove df
+educ_employ_2012_Q3 <- crosstab(QLFS_2012_Q3_CPT_WAP_df, x = educ_recode, y = Status, weight = Weight)
+write_csv(educ_employ_2012_Q3, '~/RStudio outputs/2012_Q3_educ_employ_cpt.csv', append = FALSE, col_names = TRUE)
+
+
+# create and write temp df of crosstab between educ_recode, race and employment status variables; then remove df
+educ_employ_race_2012_Q3 <- crosstab_3way(QLFS_2012_Q3_CPT_WAP_df, x = Q15POPULATION, y = educ_recode, z = Status, weight = Weight)
+write_csv(educ_employ_race_2012_Q3, '~/RStudio outputs/2012_Q3_educ_race_employ_cpt.csv', append = FALSE, col_names = TRUE)
+
+
+
+
+# # 2012 OCCUPATIONAL & EDUCATIONAL CALCULATIONS
+
+
+#create a crosstab of occupational category, educ_recode and race
+occup_educ_race_2012_Q3 <- crosstab_3way(QLFS_2012_Q3_CPT_WAP_df, x = Occup, y = Q15POPULATION, z = educ_recode, weight = Weight)
+write_csv(occup_educ_race_2012_Q3, '~/RStudio outputs/2012_Q3_occup_educ_race_cpt.csv', append = FALSE, col_names = TRUE)
+
+
+
+
+
+
+## REMOVE ALL DFs etc CREATED HERE...
+
+remove(QLFS_2012_Q3_df)
+remove(QLFS_2012_Q3_CPT_WAP_df)
+remove(occup_educ_race_2012_Q3)
+remove(educ_recode_check_temp2012)
+remove(educ_race_2012_Q3)
+remove(educ_employ_race_2012_Q3)
+remove(educ_employ_2012_Q3)
+remove(educ_labels)
