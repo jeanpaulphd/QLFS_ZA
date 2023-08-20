@@ -1,0 +1,595 @@
+
+
+
+#################################################
+################## 2022 START ##################
+#################################################
+
+
+
+
+
+
+### READ DATA
+
+QLFS_2022Q1_df <- read_dta("~/QLFS-2022-Q1-worker.dta")
+QLFS_2022Q2_df <- read_dta("~/QLFS-2022-Q2-worker.dta")
+QLFS_2022Q3_df <- read_dta("~/QLFS-2022-Q3-worker.dta")
+QLFS_2022Q4_df <- read_dta("~/QLFS-2022-Q4-worker.dta")
+
+
+### LABELS VECTORS 
+educ_labels <- c(
+  "Completed basic education (Grade 12)" = 1,
+  "Post secondary qualifications" = 2,
+  "University degree (or equivalent)" = 3,
+  "Imcomplete basic education" = 0)
+
+gender_labels <- c(
+  "Male" = 1,
+  "Female" = 0)
+
+race_labels <- c(
+  "Black African" = 0,
+  "Coloured" = 1,
+  "Indian/Asian" = 2,
+  "White" = 3)
+
+race_alt_labels <- c(
+  "Black (incl)" = 0,
+  "White" = 1)
+
+
+employ_labels <- 
+  c("Employed" = 1,
+    "Unemployed" = 0)
+
+
+
+
+### NEW DF PER QUARTER FOR WAP IN METROS
+
+QLFS_2022Q1_CPT_WAP_df <- filter(
+  QLFS_2022Q1_df, 
+  Metro_code == 2,
+  age_grp1>3 & age_grp1<14)
+
+
+QLFS_2022Q2_CPT_WAP_df <- filter(
+  QLFS_2022Q2_df, 
+  Metro_code == 2,
+  age_grp1>3 & age_grp1<14)
+
+
+QLFS_2022Q3_CPT_WAP_df <- filter(
+  QLFS_2022Q3_df, 
+  Metro_code == 2,
+  age_grp1>3 & age_grp1<14)
+
+
+QLFS_2022Q4_CPT_WAP_df <- filter(
+  QLFS_2022Q4_df, 
+  Metro_code == 2,
+  age_grp1>3 & age_grp1<14)
+
+
+
+
+### EDUCATION ###
+
+
+QLFS_2022Q1_CPT_WAP_df$educ_recode <- 
+  rec(QLFS_2022Q1_CPT_WAP_df$Q17EDUCATION, 
+      rec = "
+      0:11,14:15,20:21,30:98=0; 
+      12:13,16=1; 
+      17:19,22:24=2; 
+      25:29=3") 
+
+QLFS_2022Q2_CPT_WAP_df$educ_recode <- 
+  rec(QLFS_2022Q2_CPT_WAP_df$Q17EDUCATION, 
+      rec = "
+      0:11,14:15,20:21,30:98=0; 
+      12:13,16=1; 
+      17:19,22:24=2; 
+      25:29=3") 
+
+QLFS_2022Q3_CPT_WAP_df$educ_recode <- 
+  rec(QLFS_2022Q3_CPT_WAP_df$Q17EDUCATION, 
+      rec = "
+      0:11,14:15,20:21,30:98=0; 
+      12:13,16=1; 
+      17:19,22:24=2; 
+      25:29=3") 
+
+QLFS_2022Q4_CPT_WAP_df$educ_recode <- 
+  rec(QLFS_2022Q4_CPT_WAP_df$Q17EDUCATION, 
+      rec = "
+      0:11,14:15,20:21,30:98=0; 
+      12:13,16=1; 
+      17:19,22:24=2; 
+      25:29=3") 
+
+
+# add labels vector to the new recoded education variable
+QLFS_2022Q1_CPT_WAP_df <- QLFS_2022Q1_CPT_WAP_df %>%
+  mutate(educ_recode = add_value_labels(educ_recode, labels = educ_labels))
+
+QLFS_2022Q2_CPT_WAP_df <- QLFS_2022Q2_CPT_WAP_df %>%
+  mutate(educ_recode = add_value_labels(educ_recode, labels = educ_labels))
+
+QLFS_2022Q3_CPT_WAP_df <- QLFS_2022Q3_CPT_WAP_df %>%
+  mutate(educ_recode = add_value_labels(educ_recode, labels = educ_labels))
+
+QLFS_2022Q4_CPT_WAP_df <- QLFS_2022Q4_CPT_WAP_df %>%
+  mutate(educ_recode = add_value_labels(educ_recode, labels = educ_labels))
+
+
+# recreate the education variable as a factor 
+QLFS_2022Q1_CPT_WAP_df$educ_factor <- as.factor(QLFS_2022Q1_CPT_WAP_df$educ_recode)
+
+QLFS_2022Q2_CPT_WAP_df$educ_factor <- as.factor(QLFS_2022Q2_CPT_WAP_df$educ_recode)
+
+QLFS_2022Q3_CPT_WAP_df$educ_factor <- as.factor(QLFS_2022Q3_CPT_WAP_df$educ_recode)
+
+QLFS_2022Q4_CPT_WAP_df$educ_factor <- as.factor(QLFS_2022Q4_CPT_WAP_df$educ_recode)
+
+
+
+
+
+### GENDER ###
+# RECODE AS FOLLOWS: FEMALE = 0, MALE = 1
+QLFS_2022Q1_CPT_WAP_df$gender_recode <- 
+  rec(QLFS_2022Q1_CPT_WAP_df$Q13GENDER, rec = "2=0; 1=1")
+
+QLFS_2022Q2_CPT_WAP_df$gender_recode <- 
+  rec(QLFS_2022Q2_CPT_WAP_df$Q13GENDER, rec = "2=0; 1=1")
+
+QLFS_2022Q3_CPT_WAP_df$gender_recode <- 
+  rec(QLFS_2022Q3_CPT_WAP_df$Q13GENDER, rec = "2=0; 1=1")
+
+QLFS_2022Q4_CPT_WAP_df$gender_recode <- 
+  rec(QLFS_2022Q4_CPT_WAP_df$Q13GENDER, rec = "2=0; 1=1")
+
+
+# add labels vector to the new recoded gender variable
+QLFS_2022Q1_CPT_WAP_df <- QLFS_2022Q1_CPT_WAP_df %>%
+  mutate(gender_recode = add_value_labels(gender_recode, labels = gender_labels))
+
+QLFS_2022Q2_CPT_WAP_df <- QLFS_2022Q2_CPT_WAP_df %>%
+  mutate(gender_recode = add_value_labels(gender_recode, labels = gender_labels))
+
+QLFS_2022Q3_CPT_WAP_df <- QLFS_2022Q3_CPT_WAP_df %>%
+  mutate(gender_recode = add_value_labels(gender_recode, labels = gender_labels))
+
+QLFS_2022Q4_CPT_WAP_df <- QLFS_2022Q4_CPT_WAP_df %>%
+  mutate(gender_recode = add_value_labels(gender_recode, labels = gender_labels))
+
+
+# recreate the gender variable as a factor
+QLFS_2022Q1_CPT_WAP_df$gender_factor <- as.factor(QLFS_2022Q1_CPT_WAP_df$gender_recode)
+QLFS_2022Q2_CPT_WAP_df$gender_factor <- as.factor(QLFS_2022Q2_CPT_WAP_df$gender_recode)
+QLFS_2022Q3_CPT_WAP_df$gender_factor <- as.factor(QLFS_2022Q3_CPT_WAP_df$gender_recode)
+QLFS_2022Q4_CPT_WAP_df$gender_factor <- as.factor(QLFS_2022Q4_CPT_WAP_df$gender_recode)
+
+
+
+
+### EMPLOYMENT STATUS ###
+# RECODE AS FOLLOWS: UNEMPLOYED = 0, EMPLOYED = 1
+QLFS_2022Q1_CPT_WAP_df$employ_status <- 
+  rec(QLFS_2022Q1_CPT_WAP_df$Status, 
+      rec = "1=1; 2=0")
+
+QLFS_2022Q2_CPT_WAP_df$employ_status <- 
+  rec(QLFS_2022Q2_CPT_WAP_df$Status, 
+      rec = "1=1; 2=0")
+
+QLFS_2022Q3_CPT_WAP_df$employ_status <- 
+  rec(QLFS_2022Q3_CPT_WAP_df$Status, 
+      rec = "1=1; 2=0")
+
+QLFS_2022Q4_CPT_WAP_df$employ_status <- 
+  rec(QLFS_2022Q4_CPT_WAP_df$Status, 
+      rec = "1=1; 2=0")
+
+
+# add labels to new employ_status variable
+QLFS_2022Q1_CPT_WAP_df <- QLFS_2022Q1_CPT_WAP_df %>%
+  mutate(employ_status = add_value_labels(employ_status, labels = employ_labels))
+
+QLFS_2022Q2_CPT_WAP_df <- QLFS_2022Q2_CPT_WAP_df %>%
+  mutate(employ_status = add_value_labels(employ_status, labels = employ_labels))
+
+QLFS_2022Q3_CPT_WAP_df <- QLFS_2022Q3_CPT_WAP_df %>%
+  mutate(employ_status = add_value_labels(employ_status, labels = employ_labels))
+
+QLFS_2022Q4_CPT_WAP_df <- QLFS_2022Q4_CPT_WAP_df %>%
+  mutate(employ_status = add_value_labels(employ_status, labels = employ_labels))
+
+
+
+# recreate employ_status variable as factor
+QLFS_2022Q1_CPT_WAP_df$employ_status_factor <- as.factor(QLFS_2022Q1_CPT_WAP_df$employ_status)
+QLFS_2022Q2_CPT_WAP_df$employ_status_factor <- as.factor(QLFS_2022Q2_CPT_WAP_df$employ_status)
+QLFS_2022Q3_CPT_WAP_df$employ_status_factor <- as.factor(QLFS_2022Q3_CPT_WAP_df$employ_status)
+QLFS_2022Q4_CPT_WAP_df$employ_status_factor <- as.factor(QLFS_2022Q4_CPT_WAP_df$employ_status)
+
+
+
+
+
+### RACE ###
+# RECODE AS FOLLOWS: BLACK AFRICAN = 0, COLOURED = 1, INDIAN/ASIAN = 2, WHITE = 3
+QLFS_2022Q1_CPT_WAP_df$race_recode <-
+  rec(QLFS_2022Q1_CPT_WAP_df$Q15POPULATION,
+      rec = "1=0; 2=1; 3=2; 4=3")
+
+QLFS_2022Q2_CPT_WAP_df$race_recode <-
+  rec(QLFS_2022Q2_CPT_WAP_df$Q15POPULATION,
+      rec = "1=0; 2=1; 3=2; 4=3")
+
+QLFS_2022Q3_CPT_WAP_df$race_recode <-
+  rec(QLFS_2022Q3_CPT_WAP_df$Q15POPULATION,
+      rec = "1=0; 2=1; 3=2; 4=3")
+
+QLFS_2022Q4_CPT_WAP_df$race_recode <-
+  rec(QLFS_2022Q4_CPT_WAP_df$Q15POPULATION,
+      rec = "1=0; 2=1; 3=2; 4=3")
+
+
+
+QLFS_2022Q1_CPT_WAP_df$race_factor <- as.factor(QLFS_2022Q1_CPT_WAP_df$race_recode)
+QLFS_2022Q2_CPT_WAP_df$race_factor <- as.factor(QLFS_2022Q2_CPT_WAP_df$race_recode)
+QLFS_2022Q3_CPT_WAP_df$race_factor <- as.factor(QLFS_2022Q3_CPT_WAP_df$race_recode)
+QLFS_2022Q4_CPT_WAP_df$race_factor <- as.factor(QLFS_2022Q4_CPT_WAP_df$race_recode)
+
+# ALTERBATIVE RACE VARIABLE WITH: BLACK (INCL) = 0, WHITE = 1
+QLFS_2022Q1_CPT_WAP_df$race_recode_alt <-
+  rec(QLFS_2022Q1_CPT_WAP_df$Q15POPULATION,
+      rec = "1:3=0; 4=1")
+
+QLFS_2022Q2_CPT_WAP_df$race_recode_alt <-
+  rec(QLFS_2022Q2_CPT_WAP_df$Q15POPULATION,
+      rec = "1:3=0; 4=1")
+
+QLFS_2022Q3_CPT_WAP_df$race_recode_alt <-
+  rec(QLFS_2022Q3_CPT_WAP_df$Q15POPULATION,
+      rec = "1:3=0; 4=1")
+
+QLFS_2022Q4_CPT_WAP_df$race_recode_alt <-
+  rec(QLFS_2022Q4_CPT_WAP_df$Q15POPULATION,
+      rec = "1:3=0; 4=1")
+
+QLFS_2022Q1_CPT_WAP_df$race_factor_alt <- as.factor(QLFS_2022Q1_CPT_WAP_df$race_recode_alt)
+QLFS_2022Q2_CPT_WAP_df$race_factor_alt <- as.factor(QLFS_2022Q2_CPT_WAP_df$race_recode_alt)
+QLFS_2022Q3_CPT_WAP_df$race_factor_alt <- as.factor(QLFS_2022Q3_CPT_WAP_df$race_recode_alt)
+QLFS_2022Q4_CPT_WAP_df$race_factor_alt <- as.factor(QLFS_2022Q4_CPT_WAP_df$race_recode_alt)
+
+
+### ADDITIONAL DFs FOR MODELS 2, 3, AND 4... (CAN ONLY CREATE THESE ONCE ALL THE ADDITIONAL VARIABLES AND/OR FACTORS HAVE BEEN CREATED)
+
+# CREATE MATRIC+ DF
+QLFS_2022Q1_CPT_WAP_matricplus_df <- 
+  filter(QLFS_2022Q1_CPT_WAP_df, 
+         educ_recode %in% c(1, 2, 3))
+
+QLFS_2022Q2_CPT_WAP_matricplus_df <- 
+  filter(QLFS_2022Q2_CPT_WAP_df, 
+         educ_recode %in% c(1, 2, 3))
+
+QLFS_2022Q3_CPT_WAP_matricplus_df <- 
+  filter(QLFS_2022Q3_CPT_WAP_df, 
+         educ_recode %in% c(1, 2, 3))
+
+QLFS_2022Q4_CPT_WAP_matricplus_df <- 
+  filter(QLFS_2022Q4_CPT_WAP_df, 
+         educ_recode %in% c(1, 2, 3))
+
+
+# CREATE POST-SECONDARY EDUC DF 
+QLFS_2022Q1_CPT_WAP_postseceduc_df <-
+  filter(QLFS_2022Q1_CPT_WAP_df,
+         educ_recode %in% c(2, 3))
+
+QLFS_2022Q2_CPT_WAP_postseceduc_df <-
+  filter(QLFS_2022Q2_CPT_WAP_df,
+         educ_recode %in% c(2, 3))
+
+QLFS_2022Q3_CPT_WAP_postseceduc_df <-
+  filter(QLFS_2022Q3_CPT_WAP_df,
+         educ_recode %in% c(2, 3))
+
+QLFS_2022Q4_CPT_WAP_postseceduc_df <-
+  filter(QLFS_2022Q4_CPT_WAP_df,
+         educ_recode %in% c(2, 3))
+
+
+# CREATE DEGREE+ DF
+QLFS_2022Q1_CPT_WAP_degreeplus_df <-
+  filter(QLFS_2022Q1_CPT_WAP_df,
+         educ_recode %in% c(3))
+
+QLFS_2022Q2_CPT_WAP_degreeplus_df <-
+  filter(QLFS_2022Q2_CPT_WAP_df,
+         educ_recode %in% c(3))
+
+QLFS_2022Q3_CPT_WAP_degreeplus_df <-
+  filter(QLFS_2022Q3_CPT_WAP_df,
+         educ_recode %in% c(3))
+
+QLFS_2022Q4_CPT_WAP_degreeplus_df <-
+  filter(QLFS_2022Q4_CPT_WAP_df,
+         educ_recode %in% c(3))
+
+
+
+### LOGISTIC REGRESSION MODELS ###
+
+## MODEL 1 - CALCULATE LIIKELIHOOD OF BEING EMPLOYED BY EDUCATION, RACE, AND GENDER
+Q1_model1 <- glm(employ_status_factor ~ race_factor + educ_factor + gender_factor, data = QLFS_2022Q1_CPT_WAP_df, family = binomial)
+Q2_model1 <- glm(employ_status_factor ~ race_factor + educ_factor + gender_factor, data = QLFS_2022Q2_CPT_WAP_df, family = binomial)
+Q3_model1 <- glm(employ_status_factor ~ race_factor + educ_factor + gender_factor, data = QLFS_2022Q3_CPT_WAP_df, family = binomial)
+Q4_model1 <- glm(employ_status_factor ~ race_factor + educ_factor + gender_factor, data = QLFS_2022Q4_CPT_WAP_df, family = binomial)
+
+
+
+## MODEL 2 - CALCULATE LIIKELIHOOD OF BEING EMPLOYED BY RACE, AND GENDER (BUT ONLY FOR THOSE WITH MATRIC OR MORE)
+Q1_model2 <- glm(employ_status_factor ~ race_factor + gender_factor, 
+                 data = QLFS_2022Q1_CPT_WAP_matricplus_df, family = binomial)
+Q2_model2 <- glm(employ_status_factor ~ race_factor + gender_factor, 
+                 data = QLFS_2022Q2_CPT_WAP_matricplus_df, family = binomial)
+Q3_model2 <- glm(employ_status_factor ~ race_factor + gender_factor, 
+                 data = QLFS_2022Q3_CPT_WAP_matricplus_df, family = binomial)
+Q4_model2 <- glm(employ_status_factor ~ race_factor + gender_factor, 
+                 data = QLFS_2022Q4_CPT_WAP_matricplus_df, family = binomial)
+
+
+
+
+## MODEL 3 - CALCULATE LIIKELIHOOD OF BEING EMPLOYED BY RACE, AND GENDER (BUT ONLY FOR THOSE WITH POST-SECONDARY QUALIFICATIONS)
+Q1_model3 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q1_CPT_WAP_postseceduc_df, family = binomial)
+Q2_model3 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q2_CPT_WAP_postseceduc_df, family = binomial)
+Q3_model3 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q3_CPT_WAP_postseceduc_df, family = binomial)
+Q4_model3 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q4_CPT_WAP_postseceduc_df, family = binomial)
+
+
+Q1_model3_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q1_CPT_WAP_postseceduc_df, family = binomial)
+Q2_model3_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q2_CPT_WAP_postseceduc_df, family = binomial)
+Q3_model3_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q3_CPT_WAP_postseceduc_df, family = binomial)
+Q4_model3_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q4_CPT_WAP_postseceduc_df, family = binomial)
+
+
+## MODEL 4 - CALCULATE LIIKELIHOOD OF BEING EMPLOYED BY RACE, AND GENDER (WITH A UNIVERSITY DEGREE OR EQUIVALENT)
+Q1_model4 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q1_CPT_WAP_degreeplus_df, family = binomial)
+Q2_model4 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q2_CPT_WAP_degreeplus_df, family = binomial)
+Q3_model4 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q3_CPT_WAP_degreeplus_df, family = binomial)
+Q4_model4 <- glm(employ_status_factor ~ race_factor + gender_factor,
+                 data = QLFS_2022Q4_CPT_WAP_degreeplus_df, family = binomial)
+
+
+Q1_model4_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q1_CPT_WAP_degreeplus_df, family = binomial)
+Q2_model4_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q2_CPT_WAP_degreeplus_df, family = binomial)
+Q3_model4_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q3_CPT_WAP_degreeplus_df, family = binomial)
+Q4_model4_alt <- glm(employ_status_factor ~ race_factor_alt + gender_factor,
+                     data = QLFS_2022Q4_CPT_WAP_degreeplus_df, family = binomial)
+
+
+
+## Q1 OUTPUTS OF LOGISTIC MODELS
+
+# MODEL 1 FOR Q1 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q1_summ_model1 <- tidy(Q1_model1)
+QLFS_2022Q1_exp_coef_model1 <- exp(Q1_model1$coefficients)
+QLFS_2022Q1_exp_confint_model1 <- exp(confint(Q1_model1))
+
+# MODEL 2 FOR Q1 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q1_summ_model2 <- tidy(Q1_model2)
+QLFS_2022Q1_exp_coef_model2 <- exp(Q1_model2$coefficients)
+QLFS_2022Q1_exp_confint_model2 <- exp(confint(Q1_model2))
+
+# MODEL 3 FOR Q1 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q1_summ_model3 <- tidy(Q1_model3)
+QLFS_2022Q1_exp_coef_model3 <- exp(Q1_model3$coefficients)
+QLFS_2022Q1_exp_confint_model3 <- exp(confint(Q1_model3))
+QLFS_2022Q1_summ_model3_alt <- tidy(Q1_model3_alt)
+QLFS_2022Q1_exp_coef_model3_alt <- exp(Q1_model3_alt$coefficients)
+QLFS_2022Q1_exp_confint_model3_alt <- exp(confint(Q1_model3_alt))
+
+# MODEL 4 FOR Q1 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q1_summ_model4 <- tidy(Q1_model4)
+QLFS_2022Q1_exp_coef_model4 <- exp(Q1_model4$coefficients)
+QLFS_2022Q1_exp_confint_model4 <- exp(confint(Q1_model4))
+QLFS_2022Q1_summ_model4_alt <- tidy(Q1_model4_alt)
+QLFS_2022Q1_exp_coef_model4_alt <- exp(Q1_model4_alt$coefficients)
+QLFS_2022Q1_exp_confint_model4_alt <- exp(confint(Q1_model4_alt))
+
+
+
+
+## Q2 OUTPUTS OF LOGISTIC MODELS
+# MODEL 1 FOR Q2 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q2_summ_model1 <- tidy(Q2_model1)
+QLFS_2022Q2_exp_coef_model1 <- exp(Q2_model1$coefficients)
+QLFS_2022Q2_exp_confint_model1 <- exp(confint(Q2_model1))
+
+# MODEL 2 FOR Q2 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q2_summ_model2 <- tidy(Q2_model2)
+QLFS_2022Q2_exp_coef_model2 <- exp(Q2_model2$coefficients)
+QLFS_2022Q2_exp_confint_model2 <- exp(confint(Q2_model2))
+
+# MODEL 3 FOR Q2 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q2_summ_model3 <- tidy(Q2_model3)
+QLFS_2022Q2_exp_coef_model3 <- exp(Q2_model3$coefficients)
+QLFS_2022Q2_exp_confint_model3 <- exp(confint(Q2_model3))
+QLFS_2022Q2_summ_model3_alt <- tidy(Q2_model3_alt)
+QLFS_2022Q2_exp_coef_model3_alt <- exp(Q2_model3_alt$coefficients)
+QLFS_2022Q2_exp_confint_model3_alt <- exp(confint(Q2_model3_alt))
+
+# MODEL 4 FOR Q2 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q2_summ_model4 <- tidy(Q2_model4)
+QLFS_2022Q2_exp_coef_model4 <- exp(Q2_model4$coefficients)
+QLFS_2022Q2_exp_confint_model4 <- exp(confint(Q2_model4))
+QLFS_2022Q2_summ_model4_alt <- tidy(Q2_model4_alt)
+QLFS_2022Q2_exp_coef_model4_alt <- exp(Q2_model4_alt$coefficients)
+QLFS_2022Q2_exp_confint_model4_alt <- exp(confint(Q2_model4_alt))
+
+
+
+## Q3 OUTPUTS OF LOGISTIC MODELS
+# MODEL 1 FOR Q3 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q3_summ_model1 <- tidy(Q3_model1)
+QLFS_2022Q3_exp_coef_model1 <- exp(Q3_model1$coefficients)
+QLFS_2022Q3_exp_confint_model1 <- exp(confint(Q3_model1))
+
+# MODEL 2 FOR Q3 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q3_summ_model2 <- tidy(Q3_model2)
+QLFS_2022Q3_exp_coef_model2 <- exp(Q3_model2$coefficients)
+QLFS_2022Q3_exp_confint_model2 <- exp(confint(Q3_model2))
+
+# MODEL 3 FOR Q3 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q3_summ_model3 <- tidy(Q3_model3)
+QLFS_2022Q3_exp_coef_model3 <- exp(Q3_model3$coefficients)
+QLFS_2022Q3_exp_confint_model3 <- exp(confint(Q3_model3))
+QLFS_2022Q3_summ_model3_alt <- tidy(Q3_model3_alt)
+QLFS_2022Q3_exp_coef_model3_alt <- exp(Q3_model3_alt$coefficients)
+QLFS_2022Q3_exp_confint_model3_alt <- exp(confint(Q3_model3_alt))
+
+# MODEL 4 FOR Q3 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q3_summ_model4 <- tidy(Q3_model4)
+QLFS_2022Q3_exp_coef_model4 <- exp(Q3_model4$coefficients)
+QLFS_2022Q3_exp_confint_model4 <- exp(confint(Q3_model4))
+QLFS_2022Q3_summ_model4_alt <- tidy(Q3_model4_alt)
+QLFS_2022Q3_exp_coef_model4_alt <- exp(Q3_model4_alt$coefficients)
+QLFS_2022Q3_exp_confint_model4_alt <- exp(confint(Q3_model4_alt))
+
+
+
+## Q4 OUTPUTS OF LOGISTIC MODELS
+
+# MODEL 1 FOR Q4 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q4_summ_model1 <- tidy(Q4_model1)
+QLFS_2022Q4_exp_coef_model1 <- exp(Q4_model1$coefficients)
+QLFS_2022Q4_exp_confint_model1 <- exp(confint(Q4_model1))
+
+# MODEL 2 FOR Q4 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q4_summ_model2 <- tidy(Q4_model2)
+QLFS_2022Q4_exp_coef_model2 <- exp(Q4_model2$coefficients)
+QLFS_2022Q4_exp_confint_model2 <- exp(confint(Q4_model2))
+
+# MODEL 3 FOR Q4 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q4_summ_model3 <- tidy(Q4_model3)
+QLFS_2022Q4_exp_coef_model3 <- exp(Q4_model3$coefficients)
+QLFS_2022Q4_exp_confint_model3 <- exp(confint(Q4_model3))
+QLFS_2022Q4_summ_model3_alt <- tidy(Q4_model3_alt)
+QLFS_2022Q4_exp_coef_model3_alt <- exp(Q4_model3_alt$coefficients)
+QLFS_2022Q4_exp_confint_model3_alt <- exp(confint(Q4_model3_alt))
+
+# MODEL 4 FOR Q4 (SUMMARY OF MODEL, COEFFICIENTS, AND CONFIDENCE INTERVALS)
+QLFS_2022Q4_summ_model4 <- tidy(Q4_model4)
+QLFS_2022Q4_exp_coef_model4 <- exp(Q4_model4$coefficients)
+QLFS_2022Q4_exp_confint_model4 <- exp(confint(Q4_model4))
+QLFS_2022Q4_summ_model4_alt <- tidy(Q4_model4_alt)
+QLFS_2022Q4_exp_coef_model4_alt <- exp(Q4_model4_alt$coefficients)
+QLFS_2022Q4_exp_confint_model4_alt <- exp(confint(Q4_model4_alt))
+
+
+
+
+
+
+
+#################################################
+
+
+# Save outputs to XLSX file
+list(Q1Summary1 = QLFS_2022Q1_summ_model1, 
+     Q1Coefs1 = QLFS_2022Q1_exp_coef_model1, 
+     Q1ConfInt1 = QLFS_2022Q1_exp_confint_model1,
+     Q2Summary1 = QLFS_2022Q2_summ_model1, 
+     Q2Coefs1 = QLFS_2022Q2_exp_coef_model1, 
+     Q2ConfInt1 = QLFS_2022Q2_exp_confint_model1,
+     Q3Summary1 = QLFS_2022Q3_summ_model1, 
+     Q3Coefs1 = QLFS_2022Q3_exp_coef_model1, 
+     Q3ConfInt1 = QLFS_2022Q3_exp_confint_model1,
+     Q4Summary1 = QLFS_2022Q4_summ_model1, 
+     Q4Coefs1 = QLFS_2022Q4_exp_coef_model1, 
+     Q4ConfInt1 = QLFS_2022Q4_exp_confint_model1,
+     Q1Summary2 = QLFS_2022Q1_summ_model2, 
+     Q1Coefs2 = QLFS_2022Q1_exp_coef_model2, 
+     Q1ConfInt2 = QLFS_2022Q1_exp_confint_model2,
+     Q2Summary2 = QLFS_2022Q2_summ_model2, 
+     Q2Coefs2 = QLFS_2022Q2_exp_coef_model2, 
+     Q2ConfInt2 = QLFS_2022Q2_exp_confint_model2,
+     Q3Summary2 = QLFS_2022Q3_summ_model2, 
+     Q3Coefs2 = QLFS_2022Q3_exp_coef_model2, 
+     Q3ConfInt2 = QLFS_2022Q3_exp_confint_model2,
+     Q4Summary2 = QLFS_2022Q4_summ_model2, 
+     Q4Coefs2 = QLFS_2022Q4_exp_coef_model2, 
+     Q4ConfInt2 = QLFS_2022Q4_exp_confint_model2,
+     Q1Summary3 = QLFS_2022Q1_summ_model3, 
+     Q1Coefs3 = QLFS_2022Q1_exp_coef_model3, 
+     Q1ConfInt3 = QLFS_2022Q1_exp_confint_model3,
+     Q2Summary3 = QLFS_2022Q2_summ_model3, 
+     Q2Coefs3 = QLFS_2022Q2_exp_coef_model3, 
+     Q2ConfInt3 = QLFS_2022Q2_exp_confint_model3,
+     Q3Summary3 = QLFS_2022Q3_summ_model3, 
+     Q3Coefs3 = QLFS_2022Q3_exp_coef_model3, 
+     Q3ConfInt3 = QLFS_2022Q3_exp_confint_model3,
+     Q4Summary3 = QLFS_2022Q4_summ_model3, 
+     Q4Coefs3 = QLFS_2022Q4_exp_coef_model3, 
+     Q4ConfInt3 = QLFS_2022Q4_exp_confint_model3,
+     Q1Summary3_alt = QLFS_2022Q1_summ_model3_alt, 
+     Q1Coefs3_alt = QLFS_2022Q1_exp_coef_model3_alt, 
+     Q1ConfInt3_alt = QLFS_2022Q1_exp_confint_model3_alt,
+     Q2Summary3_alt = QLFS_2022Q2_summ_model3_alt, 
+     Q2Coefs3_alt = QLFS_2022Q2_exp_coef_model3_alt, 
+     Q2ConfInt3_alt = QLFS_2022Q2_exp_confint_model3_alt,
+     Q3Summary3_alt = QLFS_2022Q3_summ_model3_alt, 
+     Q3Coefs3_alt = QLFS_2022Q3_exp_coef_model3_alt, 
+     Q3ConfInt3_alt = QLFS_2022Q3_exp_confint_model3_alt,
+     Q4Summary3_alt = QLFS_2022Q4_summ_model3_alt, 
+     Q4Coefs3_alt = QLFS_2022Q4_exp_coef_model3_alt, 
+     Q4ConfInt3_alt = QLFS_2022Q4_exp_confint_model3_alt,
+     Q1Summary4 = QLFS_2022Q1_summ_model4, 
+     Q1Coefs4 = QLFS_2022Q1_exp_coef_model4, 
+     Q1ConfInt4 = QLFS_2022Q1_exp_confint_model4,
+     Q2Summary4 = QLFS_2022Q2_summ_model4, 
+     Q2Coefs4 = QLFS_2022Q2_exp_coef_model4, 
+     Q2ConfInt4 = QLFS_2022Q2_exp_confint_model4,
+     Q3Summary4 = QLFS_2022Q3_summ_model4, 
+     Q3Coefs4 = QLFS_2022Q3_exp_coef_model4, 
+     Q3ConfInt4 = QLFS_2022Q3_exp_confint_model4,
+     Q4Summary4 = QLFS_2022Q4_summ_model4, 
+     Q4Coefs4 = QLFS_2022Q4_exp_coef_model4, 
+     Q4ConfInt4 = QLFS_2022Q4_exp_confint_model4,
+     Q1Summary4_alt = QLFS_2022Q1_summ_model4_alt, 
+     Q1Coefs4_alt = QLFS_2022Q1_exp_coef_model4_alt, 
+     Q1ConfInt4_alt = QLFS_2022Q1_exp_confint_model4_alt,
+     Q2Summary4_alt = QLFS_2022Q2_summ_model4_alt, 
+     Q2Coefs4_alt = QLFS_2022Q2_exp_coef_model4_alt, 
+     Q2ConfInt4_alt = QLFS_2022Q2_exp_confint_model4_alt,
+     Q3Summary4_alt = QLFS_2022Q3_summ_model4_alt, 
+     Q3Coefs4_alt = QLFS_2022Q3_exp_coef_model4_alt, 
+     Q3ConfInt4_alt = QLFS_2022Q3_exp_confint_model4_alt,
+     Q4Summary4_alt = QLFS_2022Q4_summ_model4_alt, 
+     Q4Coefs4_alt = QLFS_2022Q4_exp_coef_model4_alt, 
+     Q4ConfInt4_alt = QLFS_2022Q4_exp_confint_model4_alt) |> 
+  openxlsx::write.xlsx("~/QLFS-2022-CPT-logreg-tables-20230820b.xlsx")
+
+
