@@ -1,0 +1,1543 @@
+
+# CROSSTABS WITH 95% CONFIDENCE INTERVALS ####
+
+
+## CREATE LABEL VECTORS ####
+
+
+### CREATE EDUCATION LABELS VECTOR ####
+educ_labels <- c(
+  "0. Incomplete basic education" = 0,
+  "1. Completed basic education" = 1,
+  "2. Post secondary qualifications" = 2,
+  "3. University degree (or equivalent)" = 3)
+
+### CREATE OCCUPATION LABELS VECTOR ####
+occup_labels <- c(
+  "1. Highly-skilled, high income" = 1,
+  "2. Semi-skilled, middle income (non-manual)" = 2,
+  "3. Semi-skilled, middle income (manual)" = 3,
+  "4. Low-skill, low income" = 4,
+  "99. Other" = 99)
+
+
+### RECODE ALTERNATIVE EMPLOYMENT STATUS VARIABLE ####
+status_alt_labels <- c(
+  "1. Employed" = 1,
+  "2. Unemployed" = 2,
+  "3. NEA" = 3)
+
+
+
+
+
+
+## 2012 START #### 
+
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+QLFS_2012Q1_df <- read_sav("~/2012/QLFS-2012-Q1-worker.sav") ## READ DATA INTO DF FOR 2012-Q1
+QLFS_2012Q2_df <- read_sav("~/2012/QLFS-2012-Q2-worker.sav") ## READ DATA INTO DF FOR 2012-Q2
+QLFS_2012Q3_df <- read_sav("~/2012/QLFS-2012-Q3-worker.sav") ## READ DATA INTO DF FOR 2012-Q3
+QLFS_2012Q4_df <- read_sav("~/2012/QLFS-2012-Q4-worker.sav") ## READ DATA INTO DF FOR 2012-Q4
+
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+
+QLFS_2012Q1_metros_WAP_df <- 
+  filter(QLFS_2012Q1_df, 
+         Metro_code>0, 
+         age_grp1>3 & age_grp1<14) # NEW DF FOR WAP IN ALL METROS FOR 2012-Q1
+
+QLFS_2012Q2_metros_WAP_df <- 
+  filter(QLFS_2012Q2_df, 
+         Metro_code>0, 
+         age_grp1>3 & age_grp1<14) # NEW DF FOR WAP IN ALL METROS FOR 2012-Q2
+
+QLFS_2012Q3_metros_WAP_df <- 
+  filter(QLFS_2012Q3_df, 
+         Metro_code>0, 
+         age_grp1>3 & age_grp1<14) # NEW DF FOR WAP IN ALL METROS FOR 2012-Q3
+
+QLFS_2012Q4_metros_WAP_df <- 
+  filter(QLFS_2012Q4_df, 
+         Metro_code>0, 
+         age_grp1>3 & age_grp1<14) # NEW DF FOR WAP IN ALL METROS FOR 2012-Q4
+
+
+QLFS_2012Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2012Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") # ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q1
+
+QLFS_2012Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2012Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") # ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q2
+
+QLFS_2012Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2012Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") # ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q3
+
+QLFS_2012Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2012Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") # ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q4
+
+QLFS_2012Q1_metros_WAP_df <- QLFS_2012Q1_metros_WAP_df %>% 
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) # ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q1
+
+QLFS_2012Q2_metros_WAP_df <- QLFS_2012Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) # ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q2
+
+QLFS_2012Q3_metros_WAP_df <- QLFS_2012Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) # ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q3
+
+QLFS_2012Q4_metros_WAP_df <- QLFS_2012Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) # ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2012-Q4
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2012Q1_EMP <- moe_crosstab(QLFS_2012Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) # WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2012-Q1
+
+QLFS_2012Q2_EMP <- moe_crosstab(QLFS_2012Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) # WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2012-Q2
+
+QLFS_2012Q3_EMP <- moe_crosstab(QLFS_2012Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) # WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2012-Q3
+
+QLFS_2012Q4_EMP <- moe_crosstab(QLFS_2012Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) # WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2012-Q4
+
+
+QLFS_2012Q1_check <- crosstab(QLFS_2012Q1_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) # DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2012-Q1
+
+QLFS_2012Q2_check <- crosstab(QLFS_2012Q2_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) # DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2012-Q2
+
+QLFS_2012Q3_check <- crosstab(QLFS_2012Q3_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) # DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2012-Q3
+
+QLFS_2012Q4_check <- crosstab(QLFS_2012Q4_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) # DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2012-Q4
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2012Q1_df)
+remove(QLFS_2012Q2_df)
+remove(QLFS_2012Q3_df)
+remove(QLFS_2012Q4_df)
+
+remove(QLFS_2012Q1_metros_WAP_df)
+remove(QLFS_2012Q2_metros_WAP_df)
+remove(QLFS_2012Q3_metros_WAP_df)
+remove(QLFS_2012Q4_metros_WAP_df)
+
+
+
+
+## 2013 START #### 
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+QLFS_2013Q1_df <- read_sav("~/2013/QLFS-2013-Q1-worker.sav") ## READ DATA INTO DF FOR 2013-Q1
+QLFS_2013Q2_df <- read_sav("~/2013/QLFS-2013-Q2-worker.sav") ## READ DATA INTO DF FOR 2013-Q2
+QLFS_2013Q3_df <- read_sav("~/2013/QLFS-2013-Q3-worker.sav") ## READ DATA INTO DF FOR 2013-Q3
+## no Q4 data; problem with datafile ##
+
+### RECODING VARIABLES & NEW DFs #####
+QLFS_2013Q1_metros_WAP_df <- filter(QLFS_2013Q1_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2013-Q1
+
+QLFS_2013Q2_metros_WAP_df <- filter(QLFS_2013Q2_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2013-Q2
+
+QLFS_2013Q3_metros_WAP_df <- filter(QLFS_2013Q3_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2013-Q3
+
+## no Q4 data; problem with datafile ##
+
+
+
+QLFS_2013Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2013Q1_metros_WAP_df$Status, rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2013-Q1
+
+
+QLFS_2013Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2013Q2_metros_WAP_df$Status, rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2013-Q2
+
+QLFS_2013Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2013Q3_metros_WAP_df$Status, rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2013-Q3
+
+## NO DATA FOR 2013-Q4
+
+
+QLFS_2013Q1_metros_WAP_df <- QLFS_2013Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2013-Q1
+
+QLFS_2013Q2_metros_WAP_df <- QLFS_2013Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels))## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2013-Q2
+
+QLFS_2013Q3_metros_WAP_df <- QLFS_2013Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels))## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2013-Q3
+
+## NO DATA FOR 2013-Q4
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+
+QLFS_2013Q1_EMP <- moe_crosstab(QLFS_2013Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2013-Q1
+
+QLFS_2013Q2_EMP <- moe_crosstab(QLFS_2013Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2013-Q2
+
+QLFS_2013Q3_EMP <- moe_crosstab(QLFS_2013Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2013-Q3
+
+## NO DATA FOR 2013-Q4
+
+
+QLFS_2013Q1_check <- crosstab(QLFS_2013Q1_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2013-Q1
+
+QLFS_2013Q2_check <- crosstab(QLFS_2013Q2_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2013-Q2
+
+QLFS_2013Q3_check <- crosstab(QLFS_2013Q3_metros_WAP_df, 
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2013-Q3
+
+## NO DATA FOR 2013-Q4
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2013Q1_df)
+remove(QLFS_2013Q2_df)
+remove(QLFS_2013Q3_df)
+remove(QLFS_2013Q4_df)
+
+remove(QLFS_2013Q1_metros_WAP_df)
+remove(QLFS_2013Q2_metros_WAP_df)
+remove(QLFS_2013Q3_metros_WAP_df)
+remove(QLFS_2013Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## 2014 START #### 
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+QLFS_2014Q1_df <- read_sav("~/2014/QLFS-2014-Q1-worker.sav") ## READ DATA INTO DF FOR 2014-Q1
+QLFS_2014Q2_df <- read_sav("~/2014/QLFS-2014-Q2-worker.sav") ## READ DATA INTO DF FOR 2014-Q2
+QLFS_2014Q3_df <- read_sav("~/2014/QLFS-2014-Q3-worker.sav") ## READ DATA INTO DF FOR 2014-Q3
+QLFS_2014Q4_df <- read_sav("~/2014/QLFS-2014-Q4-worker.sav") ## READ DATA INTO DF FOR 2014-Q4
+
+
+
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+
+# NEW DFs FOR THE WAP IN ALL THE METROS
+QLFS_2014Q1_metros_WAP_df <- filter(QLFS_2014Q1_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2014-Q1
+
+QLFS_2014Q2_metros_WAP_df <- filter(QLFS_2014Q2_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2014-Q2
+
+QLFS_2014Q3_metros_WAP_df <- filter(QLFS_2014Q3_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2014-Q3
+
+QLFS_2014Q4_metros_WAP_df <- filter(QLFS_2014Q4_df, 
+                                    Metro_code>0, 
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2014-Q4
+
+
+
+QLFS_2014Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2014Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q1
+
+QLFS_2014Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2014Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q2
+
+QLFS_2014Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2014Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q3
+
+QLFS_2014Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2014Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q4
+
+QLFS_2014Q1_metros_WAP_df <- QLFS_2014Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q1
+
+QLFS_2014Q2_metros_WAP_df <- QLFS_2014Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q2
+
+QLFS_2014Q3_metros_WAP_df <- QLFS_2014Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q3
+
+QLFS_2014Q4_metros_WAP_df <- QLFS_2014Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2014-Q4
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2014Q1_EMP <- moe_crosstab(QLFS_2014Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2014-Q1
+
+QLFS_2014Q2_EMP <- moe_crosstab(QLFS_2014Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2014-Q2
+
+QLFS_2014Q3_EMP <- moe_crosstab(QLFS_2014Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2014-Q3
+
+QLFS_2014Q4_EMP <- moe_crosstab(QLFS_2014Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2014-Q4
+
+QLFS_2014Q1_check <- crosstab(QLFS_2014Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2014-Q1
+
+QLFS_2014Q2_check <- crosstab(QLFS_2014Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2014-Q2
+
+QLFS_2014Q3_check <- crosstab(QLFS_2014Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2014-Q3
+
+QLFS_2014Q4_check <- crosstab(QLFS_2014Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2014-Q4
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2014Q1_df)
+remove(QLFS_2014Q2_df)
+remove(QLFS_2014Q3_df)
+remove(QLFS_2014Q4_df)
+
+remove(QLFS_2014Q1_metros_WAP_df)
+remove(QLFS_2014Q2_metros_WAP_df)
+remove(QLFS_2014Q3_metros_WAP_df)
+remove(QLFS_2014Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## 2015 START #### 
+
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+
+QLFS_2015Q1_df <- read_sav("~/2015/QLFS-2015-Q1-worker.sav") ## READ DATA INTO DF FOR 2015-Q1
+## NO DATA FOR 2015-Q2
+QLFS_2015Q3_df <- read_sav("~/2015/QLFS-2015-Q3-worker.sav") ## READ DATA INTO DF FOR 2015-Q3
+QLFS_2015Q4_df <- read_sav("~/2015/QLFS-2015-Q4-worker.sav") ## READ DATA INTO DF FOR 2015-Q4
+
+
+#
+### RECODING VARIABLES & NEW DFs #####
+#
+
+QLFS_2015Q1_metros_WAP_df <- filter(QLFS_2015Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2015-Q1
+
+# NO DATA FOR 2015-Q2
+
+QLFS_2015Q3_metros_WAP_df <- filter(QLFS_2015Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2015-Q2
+
+QLFS_2015Q4_metros_WAP_df <- filter(QLFS_2015Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2015-Q4
+
+
+
+
+QLFS_2015Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2015Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2015-Q1
+
+# NO DATA FOR 2015-Q2
+
+QLFS_2015Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2015Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2015-Q3
+
+QLFS_2015Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2015Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2015-Q4
+
+QLFS_2015Q1_metros_WAP_df <- QLFS_2015Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2015-Q1
+
+# NO DATA FOR 2015-Q2
+
+QLFS_2015Q3_metros_WAP_df <- QLFS_2015Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2015-Q3
+
+QLFS_2015Q4_metros_WAP_df <- QLFS_2015Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2015-Q4
+
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2015Q1_EMP <- moe_crosstab(QLFS_2015Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2015-Q1
+
+# NO DATA FOR 2015-Q2
+
+QLFS_2015Q3_EMP <- moe_crosstab(QLFS_2015Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2015-Q3
+
+QLFS_2015Q4_EMP <- moe_crosstab(QLFS_2015Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2015-Q4
+
+QLFS_2015Q1_check <- crosstab(QLFS_2015Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2015-Q1
+
+# NO DATA FOR 2015-Q2
+
+QLFS_2015Q3_check <- crosstab(QLFS_2015Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2015-Q3
+
+QLFS_2015Q4_check <- crosstab(QLFS_2015Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2015-Q4
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2015Q1_df)
+remove(QLFS_2015Q2_df)
+remove(QLFS_2015Q3_df)
+remove(QLFS_2015Q4_df)
+
+remove(QLFS_2015Q1_metros_WAP_df)
+remove(QLFS_2015Q2_metros_WAP_df)
+remove(QLFS_2015Q3_metros_WAP_df)
+remove(QLFS_2015Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## 2016 START #### 
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+
+
+QLFS_2016Q1_df <- read_sav("~/2016/QLFS-2016-Q1-worker.sav") ## READ DATA INTO DF FOR 2016-Q1
+QLFS_2016Q2_df <- read_sav("~/2016/QLFS-2016-Q2-worker.sav") ## READ DATA INTO DF FOR 2016-Q2
+QLFS_2016Q3_df <- read_sav("~/2016/QLFS-2016-Q3-worker.sav") ## READ DATA INTO DF FOR 2016-Q3
+QLFS_2016Q4_df <- read_sav("~/2016/QLFS-2016-Q4-worker.sav") ## READ DATA INTO DF FOR 2016-Q4
+
+
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+
+QLFS_2016Q1_metros_WAP_df <- filter(QLFS_2016Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2016-Q1
+
+QLFS_2016Q2_metros_WAP_df <- filter(QLFS_2016Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2016-Q2
+
+QLFS_2016Q3_metros_WAP_df <- filter(QLFS_2016Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2016-Q3
+
+QLFS_2016Q4_metros_WAP_df <- filter(QLFS_2016Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2016-Q4
+
+
+
+
+
+QLFS_2016Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2016Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q1
+
+QLFS_2016Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2016Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q2
+
+QLFS_2016Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2016Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q3
+
+QLFS_2016Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2016Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q4
+
+QLFS_2016Q1_metros_WAP_df <- QLFS_2016Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q1
+
+QLFS_2016Q2_metros_WAP_df <- QLFS_2016Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q2
+
+QLFS_2016Q3_metros_WAP_df <- QLFS_2016Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q3
+
+QLFS_2016Q4_metros_WAP_df <- QLFS_2016Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2016-Q4
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2016Q1_EMP <- moe_crosstab(QLFS_2016Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2016-Q1
+
+QLFS_2016Q2_EMP <- moe_crosstab(QLFS_2016Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2016-Q2
+
+QLFS_2016Q3_EMP <- moe_crosstab(QLFS_2016Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2016-Q3
+
+QLFS_2016Q4_EMP <- moe_crosstab(QLFS_2016Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2016-Q4
+
+QLFS_2016Q1_check <- crosstab(QLFS_2016Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2016-Q1
+
+QLFS_2016Q2_check <- crosstab(QLFS_2016Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2016-Q2
+
+QLFS_2016Q3_check <- crosstab(QLFS_2016Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2016-Q3
+
+QLFS_2016Q4_check <- crosstab(QLFS_2016Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2016-Q4
+
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2016Q1_df)
+remove(QLFS_2016Q2_df)
+remove(QLFS_2016Q3_df)
+remove(QLFS_2016Q4_df)
+
+remove(QLFS_2016Q1_metros_WAP_df)
+remove(QLFS_2016Q2_metros_WAP_df)
+remove(QLFS_2016Q3_metros_WAP_df)
+remove(QLFS_2016Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## 2017 START #### 
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+
+
+QLFS_2017Q1_df <- read_sav("~/2017/QLFS-2017-Q1-worker.sav") ## READ DATA INTO DF FOR 2017-Q1
+QLFS_2017Q2_df <- read_sav("~/2017/QLFS-2017-Q2-worker.sav") ## READ DATA INTO DF FOR 2017-Q2
+QLFS_2017Q3_df <- read_sav("~/2017/QLFS-2017-Q3-worker.sav") ## READ DATA INTO DF FOR 2017-Q3
+QLFS_2017Q4_df <- read_sav("~/2017/QLFS-2017-Q4-worker.sav") ## READ DATA INTO DF FOR 2017-Q4
+
+
+
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+
+QLFS_2017Q1_metros_WAP_df <- filter(QLFS_2017Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2017-Q1
+
+QLFS_2017Q2_metros_WAP_df <- filter(QLFS_2017Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2017-Q2
+
+QLFS_2017Q3_metros_WAP_df <- filter(QLFS_2017Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2017-Q3
+
+QLFS_2017Q4_metros_WAP_df <- filter(QLFS_2017Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2017-Q4
+
+
+
+
+
+QLFS_2017Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2017Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q1
+
+QLFS_2017Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2017Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q2
+
+QLFS_2017Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2017Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q3
+
+QLFS_2017Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2017Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q4
+
+QLFS_2017Q1_metros_WAP_df <- QLFS_2017Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q1
+
+QLFS_2017Q2_metros_WAP_df <- QLFS_2017Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q2
+
+QLFS_2017Q3_metros_WAP_df <- QLFS_2017Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q3
+
+QLFS_2017Q4_metros_WAP_df <- QLFS_2017Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2017-Q4
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2017Q1_EMP <- moe_crosstab(QLFS_2017Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2017-Q1
+
+QLFS_2017Q2_EMP <- moe_crosstab(QLFS_2017Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2017-Q2
+
+QLFS_2017Q3_EMP <- moe_crosstab(QLFS_2017Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2017-Q3
+
+QLFS_2017Q4_EMP <- moe_crosstab(QLFS_2017Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2017-Q4
+
+QLFS_2017Q1_check <- crosstab(QLFS_2017Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2017-Q1
+
+QLFS_2017Q2_check <- crosstab(QLFS_2017Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2017-Q2
+
+QLFS_2017Q3_check <- crosstab(QLFS_2017Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2017-Q3
+
+QLFS_2017Q4_check <- crosstab(QLFS_2017Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2017-Q4
+
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2017Q1_df)
+remove(QLFS_2017Q2_df)
+remove(QLFS_2017Q3_df)
+remove(QLFS_2017Q4_df)
+
+remove(QLFS_2017Q1_metros_WAP_df)
+remove(QLFS_2017Q2_metros_WAP_df)
+remove(QLFS_2017Q3_metros_WAP_df)
+remove(QLFS_2017Q4_metros_WAP_df)
+
+
+
+
+
+
+
+
+## 2018 START #### 
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+
+QLFS_2018Q1_df <- read_dta("~/2018/QLFS-2018-Q1-worker.dta") ## READ DATA INTO DF FOR 2018-Q1
+QLFS_2018Q2_df <- read_dta("~/2018/QLFS-2018-Q2-worker.dta") ## READ DATA INTO DF FOR 2018-Q2
+QLFS_2018Q3_df <- read_sav("~/2018/QLFS-2018-Q3-worker.sav") ## READ DATA INTO DF FOR 2018-Q3
+QLFS_2018Q4_df <- read_dta("~/2018/QLFS-2018-Q4-worker.dta") ## READ DATA INTO DF FOR 2018-Q4
+
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+
+QLFS_2018Q1_metros_WAP_df <- filter(QLFS_2018Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2018-Q1
+
+QLFS_2018Q2_metros_WAP_df <- filter(QLFS_2018Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2018-Q2
+
+QLFS_2018Q3_metros_WAP_df <- filter(QLFS_2018Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2018-Q3
+
+QLFS_2018Q4_metros_WAP_df <- filter(QLFS_2018Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2018-Q4
+
+
+
+
+
+QLFS_2018Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2018Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q1
+
+QLFS_2018Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2018Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q2
+
+QLFS_2018Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2018Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q3
+
+QLFS_2018Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2018Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q4
+
+QLFS_2018Q1_metros_WAP_df <- QLFS_2018Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q1
+
+QLFS_2018Q2_metros_WAP_df <- QLFS_2018Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q2
+
+QLFS_2018Q3_metros_WAP_df <- QLFS_2018Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q3
+
+QLFS_2018Q4_metros_WAP_df <- QLFS_2018Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2018-Q4
+
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2018Q1_EMP <- moe_crosstab(QLFS_2018Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2018-Q1
+
+QLFS_2018Q2_EMP <- moe_crosstab(QLFS_2018Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2018-Q2
+
+QLFS_2018Q3_EMP <- moe_crosstab(QLFS_2018Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2018-Q3
+
+QLFS_2018Q4_EMP <- moe_crosstab(QLFS_2018Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2018-Q4
+
+QLFS_2018Q1_check <- crosstab(QLFS_2018Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2018-Q1
+
+QLFS_2018Q2_check <- crosstab(QLFS_2018Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2018-Q2
+
+QLFS_2018Q3_check <- crosstab(QLFS_2018Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2018-Q3
+
+QLFS_2018Q4_check <- crosstab(QLFS_2018Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2018-Q4
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2018Q1_df)
+remove(QLFS_2018Q2_df)
+remove(QLFS_2018Q3_df)
+remove(QLFS_2018Q4_df)
+
+remove(QLFS_2018Q1_metros_WAP_df)
+remove(QLFS_2018Q2_metros_WAP_df)
+remove(QLFS_2018Q3_metros_WAP_df)
+remove(QLFS_2018Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## 2019 START #### 
+
+
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+
+
+QLFS_2019Q1_df <- read_dta("~/2019/QLFS-2019-Q1-worker.dta") ## READ DATA INTO DF FOR 2019-Q1
+QLFS_2019Q2_df <- read_dta("~/2019/QLFS-2019-Q2-worker.dta") ## READ DATA INTO DF FOR 2019-Q2
+QLFS_2019Q3_df <- read_dta("~/2019/QLFS-2019-Q3-worker.dta") ## READ DATA INTO DF FOR 2019-Q3
+QLFS_2019Q4_df <- read_dta("~/2019/QLFS-2019-Q4-worker.dta") ## READ DATA INTO DF FOR 2019-Q4
+
+
+
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+
+QLFS_2019Q1_metros_WAP_df <- filter(QLFS_2019Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2019-Q1
+
+QLFS_2019Q2_metros_WAP_df <- filter(QLFS_2019Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2019-Q2
+
+QLFS_2019Q3_metros_WAP_df <- filter(QLFS_2019Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2019-Q3
+
+QLFS_2019Q4_metros_WAP_df <- filter(QLFS_2019Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2019-Q4
+
+
+
+
+
+QLFS_2019Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2019Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q1
+
+QLFS_2019Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2019Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q2
+
+QLFS_2019Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2019Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q3
+
+QLFS_2019Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2019Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q4
+
+QLFS_2019Q1_metros_WAP_df <- QLFS_2019Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q1
+
+QLFS_2019Q2_metros_WAP_df <- QLFS_2019Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q2
+
+QLFS_2019Q3_metros_WAP_df <- QLFS_2019Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q3
+
+QLFS_2019Q4_metros_WAP_df <- QLFS_2019Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2019-Q4
+
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2019Q1_EMP <- moe_crosstab(QLFS_2019Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2019-Q1
+
+QLFS_2019Q2_EMP <- moe_crosstab(QLFS_2019Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2019-Q2
+
+QLFS_2019Q3_EMP <- moe_crosstab(QLFS_2019Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2019-Q3
+
+QLFS_2019Q4_EMP <- moe_crosstab(QLFS_2019Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2019-Q4
+
+QLFS_2019Q1_check <- crosstab(QLFS_2019Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2019-Q1
+
+QLFS_2019Q2_check <- crosstab(QLFS_2019Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2019-Q2
+
+QLFS_2019Q3_check <- crosstab(QLFS_2019Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2019-Q3
+
+QLFS_2019Q4_check <- crosstab(QLFS_2019Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2019-Q4
+
+
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2019Q1_df)
+remove(QLFS_2019Q2_df)
+remove(QLFS_2019Q3_df)
+remove(QLFS_2019Q4_df)
+
+remove(QLFS_2019Q1_metros_WAP_df)
+remove(QLFS_2019Q2_metros_WAP_df)
+remove(QLFS_2019Q3_metros_WAP_df)
+remove(QLFS_2019Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## 2020 START #### 
+
+### READ/IMPORT DATA INTO DFs #####
+
+QLFS_2020Q1_df <- read_dta("~/2020/QLFS-2020-Q1-worker.dta") ## READ DATA INTO DF FOR 2020-Q1
+QLFS_2020Q2_df <- read_dta("~/2020/QLFS-2020-Q2-worker.dta") ## READ DATA INTO DF FOR 2020-Q2
+QLFS_2020Q3_df <- read_dta("~/2020/QLFS-2020-Q3-worker.dta") ## READ DATA INTO DF FOR 2020-Q3
+QLFS_2020Q4_df <- read_dta("~/2020/QLFS-2020-Q4-worker.dta") ## READ DATA INTO DF FOR 2020-Q4
+
+### RECODING VARIABLES & NEW DFs #####
+
+QLFS_2020Q1_metros_WAP_df <- filter(QLFS_2020Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2020-Q1
+
+QLFS_2020Q2_metros_WAP_df <- filter(QLFS_2020Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2020-Q2
+
+QLFS_2020Q3_metros_WAP_df <- filter(QLFS_2020Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2020-Q3
+
+QLFS_2020Q4_metros_WAP_df <- filter(QLFS_2020Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2020-Q4
+
+
+
+
+
+QLFS_2020Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2020Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q1
+
+QLFS_2020Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2020Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q2
+
+QLFS_2020Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2020Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q3
+
+QLFS_2020Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2020Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q4
+
+QLFS_2020Q1_metros_WAP_df <- QLFS_2020Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q1
+
+QLFS_2020Q2_metros_WAP_df <- QLFS_2020Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q2
+
+QLFS_2020Q3_metros_WAP_df <- QLFS_2020Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q3
+
+QLFS_2020Q4_metros_WAP_df <- QLFS_2020Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2020-Q4
+
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2020Q1_EMP <- moe_crosstab(QLFS_2020Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2020-Q1
+
+QLFS_2020Q2_EMP <- moe_crosstab(QLFS_2020Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2020-Q2
+
+QLFS_2020Q3_EMP <- moe_crosstab(QLFS_2020Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2020-Q3
+
+QLFS_2020Q4_EMP <- moe_crosstab(QLFS_2020Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2020-Q4
+
+QLFS_2020Q1_check <- crosstab(QLFS_2020Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2020-Q1
+
+QLFS_2020Q2_check <- crosstab(QLFS_2020Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2020-Q2
+
+QLFS_2020Q3_check <- crosstab(QLFS_2020Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2020-Q3
+
+QLFS_2020Q4_check <- crosstab(QLFS_2020Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2020-Q4
+
+
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2020Q1_df)
+remove(QLFS_2020Q2_df)
+remove(QLFS_2020Q3_df)
+remove(QLFS_2020Q4_df)
+
+remove(QLFS_2020Q1_metros_WAP_df)
+remove(QLFS_2020Q2_metros_WAP_df)
+remove(QLFS_2020Q3_metros_WAP_df)
+remove(QLFS_2020Q4_metros_WAP_df)
+
+
+
+
+
+
+## 2021 START #### 
+
+### READ/IMPORT DATA INTO DFs #####
+
+QLFS_2021Q1_df <- read_dta("~/2021/QLFS-2021-Q1-worker.dta") ## READ DATA INTO DF FOR 2021-Q1
+QLFS_2021Q2_df <- read_dta("~/2021/QLFS-2021-Q2-worker.dta") ## READ DATA INTO DF FOR 2021-Q2
+QLFS_2021Q3_df <- read_dta("~/2021/QLFS-2021-Q3-worker.dta") ## READ DATA INTO DF FOR 2021-Q3
+# NO DATA FOR Q4, because there's no Metro_code variable
+
+
+### RECODING VARIABLES & NEW DFs #####
+
+QLFS_2021Q1_metros_WAP_df <- filter(QLFS_2021Q1_df, 
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14)## NEW DF FOR WAP IN ALL METROS FOR 2021-Q1
+
+QLFS_2021Q2_metros_WAP_df <- filter(QLFS_2021Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14)## NEW DF FOR WAP IN ALL METROS FOR 2021-Q2
+
+QLFS_2021Q3_metros_WAP_df <- filter(QLFS_2021Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14)## NEW DF FOR WAP IN ALL METROS FOR 2021-Q3
+
+# NO DATA FOR Q4, because there's no Metro_code variable
+
+
+
+
+QLFS_2021Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2021Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2021-Q1
+
+QLFS_2021Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2021Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2021-Q2
+
+QLFS_2021Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2021Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2021-Q3
+
+# NO DATA FOR Q4, because there's no Metro_code variable
+
+QLFS_2021Q1_metros_WAP_df <- QLFS_2021Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2021-Q1
+
+QLFS_2021Q2_metros_WAP_df <- QLFS_2021Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2021-Q2
+
+QLFS_2021Q3_metros_WAP_df <- QLFS_2021Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2021-Q3
+
+# NO DATA FOR Q4, because there's no Metro_code variable
+
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2021Q1_EMP <- moe_crosstab(QLFS_2021Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2021-Q1
+
+QLFS_2021Q2_EMP <- moe_crosstab(QLFS_2021Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2021-Q2
+
+QLFS_2021Q3_EMP <- moe_crosstab(QLFS_2021Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2021-Q3
+
+# NO DATA FOR Q4, because there's no Metro_code variable
+
+QLFS_2021Q1_check <- crosstab(QLFS_2021Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2021-Q1
+
+QLFS_2021Q2_check <- crosstab(QLFS_2021Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2021-Q2
+
+QLFS_2021Q3_check <- crosstab(QLFS_2021Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2021-Q3
+
+# NO DATA FOR Q4, because there's no Metro_code variable
+
+
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2021Q1_df)
+remove(QLFS_2021Q2_df)
+remove(QLFS_2021Q3_df)
+remove(QLFS_2021Q4_df)
+
+remove(QLFS_2021Q1_metros_WAP_df)
+remove(QLFS_2021Q2_metros_WAP_df)
+remove(QLFS_2021Q3_metros_WAP_df)
+remove(QLFS_2021Q4_metros_WAP_df)
+
+
+
+
+
+
+
+
+## 2022 START #### 
+
+
+### READ/IMPORT DATA INTO DFs #####
+
+QLFS_2022Q1_df <- read_dta("~/2022/QLFS-2022-Q1-worker.dta") ## READ DATA INTO DF FOR 2022-Q1
+QLFS_2022Q2_df <- read_dta("~/2022/QLFS-2022-Q2-worker.dta") ## READ DATA INTO DF FOR 2022-Q2
+QLFS_2022Q3_df <- read_dta("~/2022/QLFS-2022-Q3-worker.dta") ## READ DATA INTO DF FOR 2022-Q3
+QLFS_2022Q4_df <- read_dta("~/2022/QLFS-2022-Q4-worker.dta") ## READ DATA INTO DF FOR 2022-Q4
+
+### RECODING VARIABLES & NEW DFs #####
+
+QLFS_2022Q1_metros_WAP_df <- filter(QLFS_2022Q1_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2022-Q1
+
+QLFS_2022Q2_metros_WAP_df <- filter(QLFS_2022Q2_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2022-Q2
+
+QLFS_2022Q3_metros_WAP_df <- filter(QLFS_2022Q3_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2022-Q3
+
+QLFS_2022Q4_metros_WAP_df <- filter(QLFS_2022Q4_df,
+                                    Metro_code %in% c(2, 4, 5, 8, 10, 13, 14, 15),
+                                    age_grp1>3 & age_grp1<14) ## NEW DF FOR WAP IN ALL METROS FOR 2022-Q4
+
+
+
+
+
+QLFS_2022Q1_metros_WAP_df$status_alt <-
+  rec(QLFS_2022Q1_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q1
+
+QLFS_2022Q2_metros_WAP_df$status_alt <-
+  rec(QLFS_2022Q2_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q2
+
+QLFS_2022Q3_metros_WAP_df$status_alt <-
+  rec(QLFS_2022Q3_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q3
+
+QLFS_2022Q4_metros_WAP_df$status_alt <-
+  rec(QLFS_2022Q4_metros_WAP_df$Status,
+      rec = "
+      3:4 = 3;
+      2 = 2;
+      1 = 1") ## ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q4
+
+QLFS_2022Q1_metros_WAP_df <- QLFS_2022Q1_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q1
+
+QLFS_2022Q2_metros_WAP_df <- QLFS_2022Q2_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q2
+
+QLFS_2022Q3_metros_WAP_df <- QLFS_2022Q3_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q3
+
+QLFS_2022Q4_metros_WAP_df <- QLFS_2022Q4_metros_WAP_df %>%
+  mutate(status_alt = add_value_labels(status_alt, labels = status_alt_labels)) ## ADD LABELS TO ALTERNATIVE EMPLOYMENT STATUS VARIABLE FOR 2022-Q4
+
+
+
+### CALCULATE CROSSTAB OUTPUTS ####
+
+QLFS_2022Q1_EMP <- moe_crosstab(QLFS_2022Q1_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2022-Q1
+
+QLFS_2022Q2_EMP <- moe_crosstab(QLFS_2022Q2_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2022-Q2
+
+QLFS_2022Q3_EMP <- moe_crosstab(QLFS_2022Q3_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2022-Q3
+
+QLFS_2022Q4_EMP <- moe_crosstab(QLFS_2022Q4_metros_WAP_df, 
+                                x=Metro_code, y=status_alt, weight=Weight, zscore = 1.96) ## WEIGHTED CROSSTAB ALTERNATIVE EMPLOYMENT STATUS BY METRO, WITH 95% CONFIDENCE INTERVAL FOR 2022-Q4
+
+QLFS_2022Q1_check <- crosstab(QLFS_2022Q1_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2022-Q1
+
+QLFS_2022Q2_check <- crosstab(QLFS_2022Q2_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight)  ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2022-Q2
+
+QLFS_2022Q3_check <- crosstab(QLFS_2022Q3_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2022-Q3
+
+QLFS_2022Q4_check <- crosstab(QLFS_2022Q4_metros_WAP_df,
+                              x=Status, y=status_alt, weight=Weight) ## DOUBLE CHECK: WEIGHTED CROSSTAB OF ALTERNATIVE -VS- ORIGINAL EMPLOYMENT STATUS ACROSS ALL METROS FOR 2022-Q4
+
+
+
+
+
+
+
+#### REMOVE DFs ######
+
+
+remove(QLFS_2022Q1_df)
+remove(QLFS_2022Q2_df)
+remove(QLFS_2022Q3_df)
+remove(QLFS_2022Q4_df)
+
+remove(QLFS_2022Q1_metros_WAP_df)
+remove(QLFS_2022Q2_metros_WAP_df)
+remove(QLFS_2022Q3_metros_WAP_df)
+remove(QLFS_2022Q4_metros_WAP_df)
+
+
+
+
+
+
+
+## SAVE ALL CROSSTAB OUTPUTS TO XLSX #######
+
+list(QLFS_2012Q1_EMP = QLFS_2012Q1_EMP, QLFS_2012Q2_EMP = QLFS_2012Q2_EMP, QLFS_2012Q3_EMP = QLFS_2012Q3_EMP, QLFS_2012Q4_EMP = QLFS_2012Q4_EMP,
+     QLFS_2013Q1_EMP = QLFS_2013Q1_EMP, QLFS_2013Q2_EMP = QLFS_2013Q2_EMP, QLFS_2013Q3_EMP = QLFS_2013Q3_EMP,
+     QLFS_2014Q1_EMP = QLFS_2014Q1_EMP, QLFS_2014Q2_EMP = QLFS_2014Q2_EMP, QLFS_2014Q3_EMP = QLFS_2014Q3_EMP, QLFS_2014Q4_EMP = QLFS_2014Q4_EMP,
+     QLFS_2015Q1_EMP = QLFS_2015Q1_EMP,                                    QLFS_2015Q3_EMP = QLFS_2015Q3_EMP, QLFS_2015Q4_EMP = QLFS_2015Q4_EMP,
+     QLFS_2016Q1_EMP = QLFS_2016Q1_EMP, QLFS_2016Q2_EMP = QLFS_2016Q2_EMP, QLFS_2016Q3_EMP = QLFS_2016Q3_EMP, QLFS_2016Q4_EMP = QLFS_2016Q4_EMP,
+     QLFS_2017Q1_EMP = QLFS_2017Q1_EMP, QLFS_2017Q2_EMP = QLFS_2017Q2_EMP, QLFS_2017Q3_EMP = QLFS_2017Q3_EMP, QLFS_2017Q4_EMP = QLFS_2017Q4_EMP,
+     QLFS_2018Q1_EMP = QLFS_2018Q1_EMP, QLFS_2018Q2_EMP = QLFS_2018Q2_EMP, QLFS_2018Q3_EMP = QLFS_2018Q3_EMP, QLFS_2018Q4_EMP = QLFS_2018Q4_EMP,
+     QLFS_2019Q1_EMP = QLFS_2019Q1_EMP, QLFS_2019Q2_EMP = QLFS_2019Q2_EMP, QLFS_2019Q3_EMP = QLFS_2019Q3_EMP, QLFS_2019Q4_EMP = QLFS_2019Q4_EMP,
+     QLFS_2020Q1_EMP = QLFS_2020Q1_EMP, QLFS_2020Q2_EMP = QLFS_2020Q2_EMP, QLFS_2020Q3_EMP = QLFS_2020Q3_EMP, QLFS_2020Q4_EMP = QLFS_2020Q4_EMP,
+     QLFS_2021Q1_EMP = QLFS_2021Q1_EMP, QLFS_2021Q2_EMP = QLFS_2021Q2_EMP, QLFS_2021Q3_EMP = QLFS_2021Q3_EMP,                                     
+     QLFS_2022Q1_EMP = QLFS_2022Q1_EMP, QLFS_2022Q2_EMP = QLFS_2022Q2_EMP, QLFS_2022Q3_EMP = QLFS_2022Q3_EMP, QLFS_2022Q4_EMP = QLFS_2022Q4_EMP) |>
+  openxlsx:: write.xlsx("~/Metros outputs/ALL-QLFS-2012to2022-metros-employment-95confint-20231005.xlsx")
+
+
+list(QLFS_2012Q1_check = QLFS_2012Q1_check, QLFS_2012Q2_check = QLFS_2012Q2_check, QLFS_2012Q3_check = QLFS_2012Q3_check, QLFS_2012Q4_check = QLFS_2012Q4_check,
+     QLFS_2013Q1_check = QLFS_2013Q1_check, QLFS_2013Q2_check = QLFS_2013Q2_check, QLFS_2013Q3_check = QLFS_2013Q3_check,
+     QLFS_2014Q1_check = QLFS_2014Q1_check, QLFS_2014Q2_check = QLFS_2014Q2_check, QLFS_2014Q3_check = QLFS_2014Q3_check, QLFS_2014Q4_check = QLFS_2014Q4_check,
+     QLFS_2015Q1_check = QLFS_2015Q1_check,                                    QLFS_2015Q3_check = QLFS_2015Q3_check, QLFS_2015Q4_check = QLFS_2015Q4_check,
+     QLFS_2016Q1_check = QLFS_2016Q1_check, QLFS_2016Q2_check = QLFS_2016Q2_check, QLFS_2016Q3_check = QLFS_2016Q3_check, QLFS_2016Q4_check = QLFS_2016Q4_check,
+     QLFS_2017Q1_check = QLFS_2017Q1_check, QLFS_2017Q2_check = QLFS_2017Q2_check, QLFS_2017Q3_check = QLFS_2017Q3_check, QLFS_2017Q4_check = QLFS_2017Q4_check,
+     QLFS_2018Q1_check = QLFS_2018Q1_check, QLFS_2018Q2_check = QLFS_2018Q2_check, QLFS_2018Q3_check = QLFS_2018Q3_check, QLFS_2018Q4_check = QLFS_2018Q4_check,
+     QLFS_2019Q1_check = QLFS_2019Q1_check, QLFS_2019Q2_check = QLFS_2019Q2_check, QLFS_2019Q3_check = QLFS_2019Q3_check, QLFS_2019Q4_check = QLFS_2019Q4_check,
+     QLFS_2020Q1_check = QLFS_2020Q1_check, QLFS_2020Q2_check = QLFS_2020Q2_check, QLFS_2020Q3_check = QLFS_2020Q3_check, QLFS_2020Q4_check = QLFS_2020Q4_check,
+     QLFS_2021Q1_check = QLFS_2021Q1_check, QLFS_2021Q2_check = QLFS_2021Q2_check, QLFS_2021Q3_check = QLFS_2021Q3_check,                                     
+     QLFS_2022Q1_check = QLFS_2022Q1_check, QLFS_2022Q2_check = QLFS_2022Q2_check, QLFS_2022Q3_check = QLFS_2022Q3_check, QLFS_2022Q4_check = QLFS_2022Q4_check) |> 
+  openxlsx:: write.xlsx("~/Metros outputs/ALL-QLFS-2012to2022-metros-employment-check-20231005.xlsx")
+
+
+
+## REMOVE REMAINDER OUTPUTS & OTHER FILES ####
+
+
+remove(occup_labels)
+remove(educ_labels)
+remove(status_alt_labels)
+
+
+
+
+remove(QLFS_2012Q1_EMP)
+remove(QLFS_2012Q2_EMP)
+remove(QLFS_2012Q3_EMP)
+remove(QLFS_2012Q4_EMP)
+remove(QLFS_2013Q1_EMP)
+remove(QLFS_2013Q2_EMP)
+remove(QLFS_2013Q3_EMP)
+remove(QLFS_2013Q4_EMP)
+remove(QLFS_2014Q1_EMP)
+remove(QLFS_2014Q2_EMP)
+remove(QLFS_2014Q3_EMP)
+remove(QLFS_2014Q4_EMP)
+remove(QLFS_2015Q1_EMP)
+remove(QLFS_2015Q2_EMP)
+remove(QLFS_2015Q3_EMP)
+remove(QLFS_2015Q4_EMP)
+remove(QLFS_2016Q1_EMP)
+remove(QLFS_2016Q2_EMP)
+remove(QLFS_2016Q3_EMP)
+remove(QLFS_2016Q4_EMP)
+remove(QLFS_2017Q1_EMP)
+remove(QLFS_2017Q2_EMP)
+remove(QLFS_2017Q3_EMP)
+remove(QLFS_2017Q4_EMP)
+remove(QLFS_2018Q1_EMP)
+remove(QLFS_2018Q2_EMP)
+remove(QLFS_2018Q3_EMP)
+remove(QLFS_2018Q4_EMP)
+remove(QLFS_2019Q1_EMP)
+remove(QLFS_2019Q2_EMP)
+remove(QLFS_2019Q3_EMP)
+remove(QLFS_2019Q4_EMP)
+remove(QLFS_2020Q1_EMP)
+remove(QLFS_2020Q2_EMP)
+remove(QLFS_2020Q3_EMP)
+remove(QLFS_2020Q4_EMP)
+remove(QLFS_2021Q1_EMP)
+remove(QLFS_2021Q2_EMP)
+remove(QLFS_2021Q3_EMP)
+remove(QLFS_2021Q4_EMP)
+remove(QLFS_2022Q1_EMP)
+remove(QLFS_2022Q2_EMP)
+remove(QLFS_2022Q3_EMP)
+remove(QLFS_2022Q4_EMP)
+
+
+remove(QLFS_2012Q1_check)
+remove(QLFS_2012Q2_check)
+remove(QLFS_2012Q3_check)
+remove(QLFS_2012Q4_check)
+remove(QLFS_2013Q1_check)
+remove(QLFS_2013Q2_check)
+remove(QLFS_2013Q3_check)
+remove(QLFS_2013Q4_check)
+remove(QLFS_2014Q1_check)
+remove(QLFS_2014Q2_check)
+remove(QLFS_2014Q3_check)
+remove(QLFS_2014Q4_check)
+remove(QLFS_2015Q1_check)
+remove(QLFS_2015Q2_check)
+remove(QLFS_2015Q3_check)
+remove(QLFS_2015Q4_check)
+remove(QLFS_2016Q1_check)
+remove(QLFS_2016Q2_check)
+remove(QLFS_2016Q3_check)
+remove(QLFS_2016Q4_check)
+remove(QLFS_2017Q1_check)
+remove(QLFS_2017Q2_check)
+remove(QLFS_2017Q3_check)
+remove(QLFS_2017Q4_check)
+remove(QLFS_2018Q1_check)
+remove(QLFS_2018Q2_check)
+remove(QLFS_2018Q3_check)
+remove(QLFS_2018Q4_check)
+remove(QLFS_2019Q1_check)
+remove(QLFS_2019Q2_check)
+remove(QLFS_2019Q3_check)
+remove(QLFS_2019Q4_check)
+remove(QLFS_2020Q1_check)
+remove(QLFS_2020Q2_check)
+remove(QLFS_2020Q3_check)
+remove(QLFS_2020Q4_check)
+remove(QLFS_2021Q1_check)
+remove(QLFS_2021Q2_check)
+remove(QLFS_2021Q3_check)
+remove(QLFS_2021Q4_check)
+remove(QLFS_2022Q1_check)
+remove(QLFS_2022Q2_check)
+remove(QLFS_2022Q3_check)
+remove(QLFS_2022Q4_check)
